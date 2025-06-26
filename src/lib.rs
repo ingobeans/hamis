@@ -6,6 +6,7 @@ use crossterm::{
 };
 use image::{DynamicImage, GenericImageView};
 
+/// Convert rgba value \[u8;4\] to a crossterm color
 fn rgba_to_color(rgba: [u8; 4]) -> crossterm::style::Color {
     match rgba[3] {
         0 => crossterm::style::Color::Reset,
@@ -17,6 +18,7 @@ fn rgba_to_color(rgba: [u8; 4]) -> crossterm::style::Color {
     }
 }
 
+/// Print [DynamicImage] to console
 pub fn draw_image(image: &DynamicImage) {
     let row = vec![None; image.width() as usize];
     let mut buf = vec![row; image.height() as usize];
