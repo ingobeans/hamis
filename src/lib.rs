@@ -6,7 +6,7 @@ use crossterm::{
 };
 use image::{DynamicImage, GenericImageView};
 
-/// Convert rgba value \[u8;4\] to a crossterm color
+/// Convert rgba value \[u8;4\] to a [crossterm color](crossterm::style::Color)
 fn rgba_to_color(rgba: [u8; 4]) -> crossterm::style::Color {
     match rgba[3] {
         0 => crossterm::style::Color::Reset,
@@ -18,19 +18,18 @@ fn rgba_to_color(rgba: [u8; 4]) -> crossterm::style::Color {
     }
 }
 
-/// Print [DynamicImage] to console
+/// Print [DynamicImage] to stdout
 pub fn draw_image(image: &DynamicImage) {
-    let row = vec![None; image.width() as usize];
-    let mut buf = vec![row; image.height() as usize];
-    let pixels = image.pixels();
-    for (x, y, color) in pixels {
-        buf[y as usize][x as usize] = Some(color);
-    }
-
     let mut stdout = stdout();
+
+    // iterate over all pixels (y,x).
+
+    // we print 2 pixels at a time, since each character in a terminal's height is roughly double its width,
+    // meaning each character can represent two pixels.
+    // therefore we step y by two, and print the above and below pixel
     for y in (0..image.height()).step_by(2) {
         for x in 0..image.width() {
-            let top_rgba = buf[y as usize][x as usize].unwrap().0;
+            let top_rgba = image.get_pixel(x, y).0;
             let top_color = rgba_to_color(top_rgba);
 
             let bottom_rgba = if y == image.height() {
@@ -38,7 +37,7 @@ pub fn draw_image(image: &DynamicImage) {
                 [0, 0, 0, 0]
             } else {
                 // if not at last row, read rgba of below pixel
-                buf[y as usize + 1][x as usize].unwrap().0
+                image.get_pixel(x, y + 1).0
             };
 
             let bottom_color = rgba_to_color(bottom_rgba);
@@ -64,6 +63,5 @@ pub fn draw_image(image: &DynamicImage) {
         queue!(stdout, ResetColor).unwrap();
         println!();
     }
-    queue!(stdout, ResetColor).unwrap();
     stdout.flush().unwrap();
 }
