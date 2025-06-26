@@ -46,9 +46,9 @@ pub fn draw_image(image: &DynamicImage) {
             let bottom_color = rgba_to_color(bottom_rgba);
 
             if top_rgba[3] == 0 {
+                queue!(stdout, ResetColor).unwrap();
                 if bottom_rgba[3] == 0 {
                     // if both pixels are empty
-                    queue!(stdout, ResetColor).unwrap();
                     print!(" ");
                     continue;
                 }
