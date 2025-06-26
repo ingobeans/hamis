@@ -33,15 +33,13 @@ pub fn draw_image(image: &DynamicImage) {
             let top_rgba = buf[y as usize][x as usize].unwrap().0;
             let top_color = rgba_to_color(top_rgba);
 
-            let bottom_rgba;
-
-            if y == image.height() {
+            let bottom_rgba = if y == image.height() {
                 // if at last row, pretend bottom pixel is transparent
-                bottom_rgba = [0, 0, 0, 0];
+                [0, 0, 0, 0]
             } else {
                 // if not at last row, read rgba of below pixel
-                bottom_rgba = buf[y as usize + 1][x as usize].unwrap().0;
-            }
+                buf[y as usize + 1][x as usize].unwrap().0
+            };
 
             let bottom_color = rgba_to_color(bottom_rgba);
 
@@ -64,7 +62,7 @@ pub fn draw_image(image: &DynamicImage) {
             print!("▀");
         }
         queue!(stdout, ResetColor).unwrap();
-        println!("");
+        println!();
     }
     queue!(stdout, ResetColor).unwrap();
     stdout.flush().unwrap();
