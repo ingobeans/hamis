@@ -5,7 +5,7 @@ use std::{
 
 use crossterm::{
     queue,
-    style::{ResetColor, SetBackgroundColor},
+    style::{ResetColor, SetBackgroundColor, SetForegroundColor},
 };
 use image::{GenericImageView, guess_format};
 
@@ -29,17 +29,24 @@ fn main() {
     }
 
     let mut stdout = stdout();
-    for y in (0..image.height()).step_by(1) {
+    for y in (0..image.height()).step_by(2) {
         for x in 0..image.width() {
-            let pixel = buf[y as usize][x as usize].unwrap();
-            let rgb = pixel.0;
-            let color = crossterm::style::Color::Rgb {
-                r: rgb[0],
-                g: rgb[1],
-                b: rgb[2],
+            let top_pixel = buf[y as usize][x as usize].unwrap().0;
+            let top_color = crossterm::style::Color::Rgb {
+                r: top_pixel[0],
+                g: top_pixel[1],
+                b: top_pixel[2],
             };
-            queue!(stdout, SetBackgroundColor(color)).unwrap();
-            print!(" ");
+
+            let bottom_pixel = buf[y as usize + 1][x as usize].unwrap().0;
+            let bottom_color = crossterm::style::Color::Rgb {
+                r: bottom_pixel[0],
+                g: bottom_pixel[1],
+                b: bottom_pixel[2],
+            };
+            queue!(stdout, SetBackgroundColor(bottom_color)).unwrap();
+            queue!(stdout, SetForegroundColor(top_color)).unwrap();
+            print!("▀");
         }
         queue!(stdout, ResetColor).unwrap();
         println!("");
