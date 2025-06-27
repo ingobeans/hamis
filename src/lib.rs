@@ -1,4 +1,4 @@
-use std::io::{Write, stdout};
+use std::io::{stdout, Write};
 
 use crossterm::{
     queue,
@@ -19,7 +19,7 @@ fn rgba_to_color(rgba: [u8; 4]) -> crossterm::style::Color {
 }
 
 /// Print [DynamicImage] to stdout
-pub fn draw_image(image: &DynamicImage) {
+pub fn draw_image(image: &DynamicImage, scale_factor: u32) {
     let mut stdout = stdout();
 
     // iterate over all pixels (y,x).
@@ -27,17 +27,17 @@ pub fn draw_image(image: &DynamicImage) {
     // we print 2 pixels at a time, since each character in a terminal's height is roughly double its width,
     // meaning each character can represent two pixels.
     // therefore we step y by two, and print the above and below pixel
-    for y in (0..image.height()).step_by(2) {
-        for x in 0..image.width() {
-            let top_rgba = image.get_pixel(x, y).0;
+    for y in (0..image.height() * scale_factor).step_by(2) {
+        for x in 0..image.width() * scale_factor {
+            let top_rgba = image.get_pixel(x / scale_factor, y / scale_factor).0;
             let top_color = rgba_to_color(top_rgba);
 
-            let bottom_rgba = if y == image.height() {
+            let bottom_rgba = if y / scale_factor == image.height() {
                 // if at last row, pretend bottom pixel is transparent
                 [0, 0, 0, 0]
             } else {
                 // if not at last row, read rgba of below pixel
-                image.get_pixel(x, y + 1).0
+                image.get_pixel(x / scale_factor, (y + 1) / scale_factor).0
             };
 
             let bottom_color = rgba_to_color(bottom_rgba);
@@ -58,6 +58,7 @@ pub fn draw_image(image: &DynamicImage) {
             // if neither pixel is empty
             queue!(stdout, SetBackgroundColor(bottom_color)).unwrap();
             queue!(stdout, SetForegroundColor(top_color)).unwrap();
+
             print!("▀");
         }
         queue!(stdout, ResetColor).unwrap();

@@ -3,11 +3,23 @@ use std::{env::args, io::Cursor};
 use hamis::draw_image;
 use image::guess_format;
 
+const HELP: &str = "usage: hamis <image path> [scale factor]";
+
 fn main() {
     let mut args = args();
     let Some(image_path) = args.nth(1) else {
-        println!("usage: hamis <image path>");
+        println!("{HELP}");
         return;
+    };
+    let scale_factor = match args.next() {
+        Some(value) => match value.parse() {
+            Ok(value) => value,
+            Err(_) => {
+                println!("error: invalid scale factor.\n{HELP}");
+                return;
+            }
+        },
+        None => 1,
     };
 
     // read file data to buffer
@@ -29,5 +41,5 @@ fn main() {
 
     let image = image::load(cursor, format).unwrap();
 
-    draw_image(&image);
+    draw_image(&image, scale_factor);
 }
